@@ -1,0 +1,92 @@
+#include <iostream>
+#include <windows.h>
+
+void main() 
+{
+	const int ROW = 9;
+	const int COL = 30;
+
+	char tiles[] = { ' ', '=', '|', '1', '2', '3', '4', '5', '6', '7' };
+	int maps[][30] = {
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0}, //1
+		{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
+		{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
+		{6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
+		{7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
+		{8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
+		{9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, //9
+	};
+
+	bool isGameOver = false;
+	int arrCurrentIndexs[7] = { 0, };
+
+	srand(time(0));
+
+	while (true)
+	{
+		{ //이동
+			int specialIndex = rand() % 7;
+
+			for (int i = 0; i < 7; i++)
+			{
+				if (i == specialIndex && arrCurrentIndexs[specialIndex] != 30)
+				{
+					int currentIndex = arrCurrentIndexs[specialIndex];
+					int temp = maps[i + 1][currentIndex];
+					maps[i + 1][currentIndex] = 0;
+					maps[i + 1][currentIndex + 2] = temp;
+					arrCurrentIndexs[specialIndex] += 2;
+				}
+
+				else
+				{
+					int currentIndex = arrCurrentIndexs[i];
+					int temp = maps[i + 1][currentIndex];
+					maps[i + 1][currentIndex] = 0;
+					maps[i + 1][currentIndex + 1] = temp;
+					++arrCurrentIndexs[i];
+				}
+			}
+		}
+
+
+		{ //랜더링
+			for (int i = 0; i < ROW; i++)
+			{
+				for (int j = 0; j < COL; j++)
+				{
+					int index = maps[i][j];
+					std::cout << tiles[index];
+				}
+				std::cout << std::endl;
+			}
+		}
+
+
+
+		{ //결과 처리
+			int winNumberIndex = -1;
+
+			for (int i = 0; i < 7; i++)
+			{
+				if (arrCurrentIndexs[i] > 27)
+				{
+					winNumberIndex = i;
+					std::cout << "1등: " << winNumberIndex + 1 << std::endl;
+					isGameOver = true;
+				}
+			}
+		}
+
+		if (isGameOver)
+		{
+			break;
+		}
+
+		Sleep(300);
+		system("cls");
+		}
+	}
+}
