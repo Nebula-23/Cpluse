@@ -1,7 +1,6 @@
 #include <iostream>
 #include <windows.h>
-#include <vector>
-#include <algorithm>
+#include <map>
 
 void main()
 {
@@ -24,8 +23,8 @@ void main()
 
 	int arrCurrentIndexs[7] = { 0, }; // 말의 현재 위치
 	bool isFinished[7] = { false }; // 말이 결승선을 넘었는지에 대한 판독
+	std::multimap<int, int> horseRanks; // 등수, 말번호
 
-	std::vector < std::pair <int, int>> horseRanks;
 
 	srand(time(0));
 
@@ -77,37 +76,30 @@ void main()
 		}
 
 		{ //결과 처리
-			int rank = 1;
+			int rank = 1; // 등수 저장
 
-			for (int i = 0; i < 7; i++) // 등수계산
+			for (int i = 0; i < 7; i++)
 			{
-				if (arrCurrentIndexs[i] >= 28 && isFinished[i] != false)
+				if (isFinished[i])
 				{
 					++rank;
 				}
 			}
 
 			for (int i = 0; i < 7; i++) // 도달시점 계산
-			{
-				if (arrCurrentIndexs[i] >= 28 && isFinished[i] == false)
+			{	// 이전시점과 같은 시점에 도착하면 같은 등수를 줌
+				if (arrCurrentIndexs[i] >= 28 && !isFinished[i])
 				{
 					isFinished[i] = true;
-					horseRanks.push_back({ i + 1, rank });
+					horseRanks.insert({ rank, i + 1 });
 				}
 			}
 
-			// 등수 오름차순 정렬
-			std::sort(horseRanks.begin(), horseRanks.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
-				return a.second < b.second;
-				});
-
-
-			// 출력
-			for (const auto& innerVec : horseRanks) {
-				std::cout << innerVec.second << "등: " << innerVec.first << std::endl;
+			for (const auto& [ranking, horseNum] : horseRanks) {
+				std::cout << ranking << "등: " << horseNum << std::endl;
 			}
 
-			if (rank == 8)
+			if (horseRanks.size() == 7)
 			{
 				isGameOver = true;
 			}
