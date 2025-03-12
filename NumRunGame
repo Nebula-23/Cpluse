@@ -1,10 +1,13 @@
 #include <iostream>
 #include <windows.h>
+#include <vector>
+#include <algorithm>
 
-void main() 
+void main()
 {
 	const int ROW = 9;
 	const int COL = 30;
+	bool isGameOver = false;
 
 	char tiles[] = { ' ', '=', '|', '1', '2', '3', '4', '5', '6', '7' };
 	int maps[][30] = {
@@ -16,11 +19,13 @@ void main()
 		{7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
 		{8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
 		{9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, //9
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1} //9
 	};
 
-	bool isGameOver = false;
-	int arrCurrentIndexs[7] = { 0, };
+	int arrCurrentIndexs[7] = { 0, }; // 말의 현재 위치
+	bool isFinished[7] = { false }; // 말이 결승선을 넘었는지에 대한 판독
+
+	std::vector < std::pair <int, int>> horseRanks;
 
 	srand(time(0));
 
@@ -29,28 +34,35 @@ void main()
 		{ //이동
 			int specialIndex = rand() % 7;
 
+			while (arrCurrentIndexs[specialIndex] > 29);
+			{
+				specialIndex = rand() % 7;
+			}
+
 			for (int i = 0; i < 7; i++)
 			{
-				if (i == specialIndex && arrCurrentIndexs[specialIndex] != 30)
+				if (arrCurrentIndexs[i] < 28)
 				{
-					int currentIndex = arrCurrentIndexs[specialIndex];
-					int temp = maps[i + 1][currentIndex];
-					maps[i + 1][currentIndex] = 0;
-					maps[i + 1][currentIndex + 2] = temp;
-					arrCurrentIndexs[specialIndex] += 2;
-				}
+					if (i == specialIndex)
+					{
+						int currentIndex = arrCurrentIndexs[specialIndex]; // currentIndex에 해당 배열의 현재 위치 대입
+						int temp = maps[i + 1][currentIndex]; //temp에 현재위치(maps[i + 1][currentIndex])대입
+						maps[i + 1][currentIndex] = 0;		  // 현재 위치를 0으로 변환
+						maps[i + 1][currentIndex + 2] = temp; // 이동할 위치에 temp값 입력
+						arrCurrentIndexs[specialIndex] += 2;  //이동한 위치를 등록 후 저장
+					}
 
-				else
-				{
-					int currentIndex = arrCurrentIndexs[i];
-					int temp = maps[i + 1][currentIndex];
-					maps[i + 1][currentIndex] = 0;
-					maps[i + 1][currentIndex + 1] = temp;
-					++arrCurrentIndexs[i];
+					else
+					{
+						int currentIndex = arrCurrentIndexs[i];
+						int temp = maps[i + 1][currentIndex];
+						maps[i + 1][currentIndex] = 0;
+						maps[i + 1][currentIndex + 1] = temp;
+						++arrCurrentIndexs[i];
+					}
 				}
 			}
 		}
-
 
 		{ //랜더링
 			for (int i = 0; i < ROW; i++)
@@ -64,19 +76,40 @@ void main()
 			}
 		}
 
-
-
 		{ //결과 처리
-			int winNumberIndex = -1;
+			int rank = 1;
 
-			for (int i = 0; i < 7; i++)
+			for (int i = 0; i < 7; i++) // 등수계산
 			{
-				if (arrCurrentIndexs[i] > 27)
+				if (arrCurrentIndexs[i] >= 28 && isFinished[i] != false)
 				{
-					winNumberIndex = i;
-					std::cout << "1등: " << winNumberIndex + 1 << std::endl;
-					isGameOver = true;
+					++rank;
 				}
+			}
+
+			for (int i = 0; i < 7; i++) // 도달시점 계산
+			{
+				if (arrCurrentIndexs[i] >= 28 && isFinished[i] == false)
+				{
+					isFinished[i] = true;
+					horseRanks.push_back({ i + 1, rank });
+				}
+			}
+
+			// 등수 오름차순 정렬
+			std::sort(horseRanks.begin(), horseRanks.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+				return a.second < b.second;
+				});
+
+
+			// 출력
+			for (const auto& innerVec : horseRanks) {
+				std::cout << innerVec.second << "등: " << innerVec.first << std::endl;
+			}
+
+			if (rank == 8)
+			{
+				isGameOver = true;
 			}
 		}
 
@@ -85,8 +118,8 @@ void main()
 			break;
 		}
 
-		Sleep(300);
+		Sleep(500);
 		system("cls");
-		}
+
 	}
 }
